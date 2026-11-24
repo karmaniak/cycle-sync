@@ -1,0 +1,33 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  core:
+    name: CycleCore tests
+    runs-on: ubuntu-latest
+    container: swift:6.0-noble
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+
+  app:
+    name: Build iOS app
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen
+      - run: xcodegen generate
+        working-directory: App
+      - name: Build for simulator
+        working-directory: App
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project CycleCompanion.xcodeproj \
+            -scheme CycleCompanion \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            | grep -E "error|warning: unre|BUILD|\*\*" || true
+          test "${PIPESTATUS[0]}" -eq 0

@@ -1,12 +1,20 @@
 name: CI
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch or PR cancels the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   core:
     name: CycleCore tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     container: swift:6.0-noble
     steps:
       - uses: actions/checkout@v4
@@ -14,7 +22,11 @@ jobs:
 
   app:
     name: Build iOS app
+    # macOS minutes are the expensive ones: build the app on pull requests
+    # (and on demand), not again on the merge into main.
+    if: github.event_name != 'push'
     runs-on: macos-15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - run: brew install xcodegen

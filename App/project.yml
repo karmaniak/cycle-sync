@@ -1,0 +1,70 @@
+# Generate the Xcode project with:  cd App && xcodegen generate
+# Before running on a device, replace com.example with your own prefix here,
+# in Shared/AppIdentifiers.swift and in the two .entitlements files.
+name: CycleCompanion
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+packages:
+  CycleCore:
+    path: ..
+targets:
+  CycleCompanion:
+    type: application
+    platform: iOS
+    sources:
+      - CycleCompanion
+      - Shared
+    dependencies:
+      - package: CycleCore
+      - target: CycleWidget
+    entitlements:
+      path: CycleCompanion/CycleCompanion.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.cyclecompanion
+        TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: CycleCompanion/Info.plist
+      properties:
+        CFBundleDisplayName: Cycle Companion
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIBackgroundModes: [remote-notification]
+        CKSharingSupported: true
+        ITSAppUsesNonExemptEncryption: false
+        NSHealthShareUsageDescription: Cycle Companion reads your period days from Apple Health to work out your cycle day and phase on this iPhone. Your Health data never leaves your device.
+  CycleWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - CycleWidget
+      - Shared
+    dependencies:
+      - package: CycleCore
+    entitlements:
+      path: CycleWidget/CycleWidget.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.cyclecompanion.widget
+    info:
+      path: CycleWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Cycle Companion
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+schemes:
+  CycleCompanion:
+    build:
+      targets:
+        CycleCompanion: all
+    run:
+      config: Debug
